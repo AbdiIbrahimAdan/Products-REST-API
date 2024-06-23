@@ -2,10 +2,10 @@ import pool from "../db.config.js";
 export const getAllProducts = async(req, res) =>{
     try{
      const result = await pool.query('SELECT * FROM products');
-     res.json(result.rows);
+     res.status(200).json({success:true, data:result.rows});
     }
     catch(err){
-     res.status(500).send(err.message)
+     res.status(500).send({success:false, message:err.message});
     }
  };
  export const createProduct = async(req, res) =>{
@@ -33,7 +33,22 @@ export const getSingleProduct =  async(req, res) =>{
         res.status(500).send(err.message);
     }
 };
-
+export const updateProduct = async(req, res) =>{
+    try{
+        const { id } = req.params;
+        const {productThumbnail, productTitle, productDescription, productCost, onOffer} = req.body;
+        const productUpdate=await pool.query("UPDATE products SET productThumbnail=$1, productTitle=$2, productDescription=$3, productCost=$4, onOffer=$5 WHERE id=$6", [productThumbnail, productTitle, productDescription, productCost, onOffer, id ])
+        if (productUpdate.rowCount=== 1){
+            res.status(200).json({success:true, message: "product updated successfully"});
+        }
+        else{
+            res.status(400).json({success:false, message: "invalid product"});
+        }
+     
+    }catch(err){
+     res.status(500).json({success:false, message:err.message});
+    }
+};
 export const updateAllProductInfo = async(req, res) =>{
     const { id } = req.params;
     const {productThumbnail, productTitle, productDescription, productCost, onOffer} = req.body;
